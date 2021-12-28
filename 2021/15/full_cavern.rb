@@ -22,13 +22,11 @@ target = [max_x, max_y]
 
 q = Set[]
 dist = {}
-prev = {}
 
 (0..max_x).each do |x|
   (0..max_y).each do |y|
     v = [x,y]
     dist[v] = Float::INFINITY
-    prev[v] = nil
     q << v
   end
 end
@@ -62,7 +60,6 @@ until q.empty?
     if alt < dist[v]
       dist[v] = alt
       qdist[v] = alt
-      prev[v] = u
     end
   end
 end
