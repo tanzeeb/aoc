@@ -20,25 +20,18 @@ max_y = map.size - 1
 source = [0,0]
 target = [max_x, max_y]
 
-q = Set[]
-dist = {}
-
-(0..max_x).each do |x|
-  (0..max_y).each do |y|
-    v = [x,y]
-    dist[v] = Float::INFINITY
-    q << v
-  end
-end
-
+q = Set[source]
+dist = Hash.new(Float::INFINITY)
 dist[source] = 0
 qdist = dist.dup
+discard = Set[]
 
 until q.empty?
   u = qdist.min_by{|_,v| v }.first
 
   q.delete u
   qdist.delete u
+  discard << u
 
   break if u == target
 
@@ -50,7 +43,7 @@ until q.empty?
   neighbours << [ux,uy+1] if uy < max_y
   neighbours << [ux,uy-1] if uy > 0
 
-  neighbours.select! { |v| qdist.has_key? v }
+  neighbours.reject! { |v| discard.include? v }
 
   neighbours.each do |v|
     vx, vy = v
@@ -58,6 +51,7 @@ until q.empty?
     alt = dist[u] + map[vx][vy]
 
     if alt < dist[v]
+      q.add v
       dist[v] = alt
       qdist[v] = alt
     end
