@@ -50,7 +50,7 @@ until q.empty?
   neighbours << [ux,uy+1] if uy < max_y
   neighbours << [ux,uy-1] if uy > 0
 
-  neighbours.select! { |v| q.include? v }
+  neighbours.select! { |v| qdist.has_key? v }
 
   neighbours.each do |v|
     vx, vy = v
