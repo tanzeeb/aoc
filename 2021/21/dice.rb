@@ -7,10 +7,6 @@ rolls = 0
 
 scores = [0,0]
 
-def move start, spaces
-  (start+spaces-1) % 10 + 1
-end
-
 loop do
   pawns.size.times do |i|
     spaces = 3.times.map { dice = dice % 100 + 1 }.sum
