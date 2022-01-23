@@ -113,10 +113,14 @@ dist[start] = 0
 goal = Hash.new(Float::INFINITY)
 goal[start] = ideal start
 
+discard = Set[]
+
 until q.empty?
-  u = q.min {|a,b| goal[a] <=> goal[b]}
+  u = goal.min_by {|_,v| v}.first
 
   q.delete u
+  goal.delete u
+  discard << u
 
   break if u == @target
 
@@ -124,10 +128,13 @@ until q.empty?
     alt = dist[u] + energy(move)
     v = step(u, move)
 
+    next if discard.include?(v)
+
     if alt < dist[v]
       q.add v
+      i = ideal(v)
       dist[v] = alt
-      goal[v] = alt + ideal(v)
+      goal[v] = alt + i
     end
   end
 end
