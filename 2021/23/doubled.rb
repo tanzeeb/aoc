@@ -124,24 +124,6 @@ def ideal burrow
   end.sum
 end
 
-def completion burrow
-  sum = 0
-
-  @target.each do |spot,amphipod|
-    unless [
-      burrow[spot] == amphipod,
-      above(*spot).all? {|s| burrow[s] == amphipod || burrow[s].nil?},
-      below(*spot).all? {|s| burrow[s] == amphipod}
-    ].all?
-      sum += spot[1]*1000 
-    end
-
-    sum += @levels[amphipod] if burrow[spot].nil?
-  end
-
-  sum
-end
-
 q = Set[start]
 
 dist = Hash.new(Float::INFINITY)
@@ -150,39 +132,27 @@ dist[start] = 0
 goal = Hash.new(Float::INFINITY)
 goal[start] = ideal start
 
-count = 0
-
-IO::console.clear_screen
+discard = Set[]
 
 until q.empty?
-  IO::console.goto(0,0)
-
-  u = q.min {|a,b| goal[a] <=> goal[b]}
-  #pp q.map {|b| goal[b]}
-  count += 1
-  #break if count > 2
+  u = goal.min_by {|_,v| v}.first
 
   q.delete u
-
-  draw u
-  puts "#q: #{q.size} dist: #{dist[u]} - diff: #{goal[u] - dist[u]}"
+  goal.delete u
+  discard << u
 
   break if u == @target
 
-  m = moves(u)
-  m.each do |move|
+  moves(u).each do |move|
     alt = dist[u] + energy(move)
     v = step(u, move)
+
+    next if discard.include?(v)
 
     if alt < dist[v]
       q.add v
       dist[v] = alt
-
-      i = ideal(v)
-      c = completion(v)
-      goal[v] = alt + i
-
-      #puts "#{move.inspect} - #{i} - #{c} - #{alt}"
+      goal[v] = alt + ideal(v)
     end
   end
 end
