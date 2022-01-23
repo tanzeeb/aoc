@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'set'
+require 'io/console'
 
 @levels = {
   'A' => 1,
@@ -108,7 +109,7 @@ def ideal burrow
   t = @target.dup
   b = burrow.dup
 
-  sames = b.select { |k,v| t[k] == v }
+  sames = b.select { |k,v| t[k] == v && below(*k).all? {|s| t[s] == b[s]} }
   sames.each do |spot,_|
     t.delete spot
     b.delete spot
@@ -127,9 +128,15 @@ def completion burrow
   sum = 0
 
   @target.each do |spot,amphipod|
-    c = @levels[amphipod] * spot[1] 
+    unless [
+      burrow[spot] == amphipod,
+      above(*spot).all? {|s| burrow[s] == amphipod || burrow[s].nil?},
+      below(*spot).all? {|s| burrow[s] == amphipod}
+    ].all?
+      sum += spot[1]*1000 
+    end
 
-    sum += c if burrow[spot] && amphipod != burrow[spot]
+    sum += @levels[amphipod] if burrow[spot].nil?
   end
 
   sum
@@ -143,13 +150,22 @@ dist[start] = 0
 goal = Hash.new(Float::INFINITY)
 goal[start] = ideal start
 
+count = 0
+
+IO::console.clear_screen
+
 until q.empty?
+  IO::console.goto(0,0)
+
   u = q.min {|a,b| goal[a] <=> goal[b]}
+  #pp q.map {|b| goal[b]}
+  count += 1
+  #break if count > 2
 
   q.delete u
 
   draw u
-  puts "#{dist[u]} - #{goal[u] - dist[u]}"
+  puts "#q: #{q.size} dist: #{dist[u]} - diff: #{goal[u] - dist[u]}"
 
   break if u == @target
 
@@ -165,6 +181,8 @@ until q.empty?
       i = ideal(v)
       c = completion(v)
       goal[v] = alt + i
+
+      #puts "#{move.inspect} - #{i} - #{c} - #{alt}"
     end
   end
 end
