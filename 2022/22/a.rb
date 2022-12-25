@@ -34,6 +34,14 @@ Position = Struct.new(:node, :facing) do
       self.node = self.node.send @directions[self.facing]
     end
   end
+
+  def to_s
+    { x: node.x, y: node.y, dir: facing }.to_s
+  end
+
+  def inspect
+    { x: node.x, y: node.y, dir: facing }.inspect
+  end
 end
 
 start = nil
@@ -102,9 +110,9 @@ end
 
 position = Position.new(start, 0)
 
-path.join("").scan(/(\d+)([RL])/) do |(moves,turn)|
+path.join("").scan(/(\d+)([RL]?)/) do |(moves,turn)|
   position.move(moves.to_i)
-  position.rotate(turn)
+  position.rotate(turn) unless turn.empty?
 end
 
 puts [(position.node.y+1)*1000, (position.node.x+1)*4, position.facing].sum
