@@ -34,8 +34,6 @@ until @unvisited.empty?
   @unvisited.delete pos
   @visited.add pos
 
-  # break if pos.first == @end.first
-
   moves = [
     [[pos.first, @dirs[pos.last].first], 1000],
     [[pos.first, @dirs[pos.last].last], 1000]
@@ -52,33 +50,27 @@ until @unvisited.empty?
 
     if dist < @dist[node]
       @dist[node] = dist
-      @prev[node.first] = Set[pos.first] unless node.first == pos.first
+      @prev[node] = Set[pos]
+    elsif dist == @dist[node]
+      @prev[node] << pos
     end
-
-    @prev[node.first] << pos.first if dist == @dist[node] && node.first != pos.first
 
     @unvisited.add node
   end
 
 end
 
-pp @prev
-pp @prev.size
-
-count = 0
-@paths = [@end.first]
-@shortest = Set.new
+@paths = @dirs.keys.map { |dir| [@end.first, dir] }.group_by { |pos| @dist[pos] }.min.last
+@shortest = Set[]
 
 until @paths.empty?
   path = @paths.shift
 
-  @shortest.add path
+  @shortest.add path.first
 
-  break if path == @start.first
+  break if path == @start
 
-  @prev[path].each { |n| @paths.append n unless @shortest.include? n }
-
-  count += 1
+  @prev[path].each { |n| @paths.append n }
 end
 
-puts count
+puts @shortest.size
